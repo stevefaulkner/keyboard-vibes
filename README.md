@@ -1,5 +1,9 @@
 # keyboard-vibes
-test harness for keyboard tests built using chatgpt
+test harness for keyboard tests built using chatgpt. 
+**This is an experiment only**
+I have no idea how accurate it the output is.
+Use with extreme caution and awareness. Modify it as you like!
+
 # Keyboard Operability JS Stable v2 – Setup and Usage Guide
 
 ## 1. Overview
