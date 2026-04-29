@@ -1,5 +1,7 @@
 # keyboard-vibes
 test harness for keyboard tests built using chatgpt. 
+**article:** [keyboard testing with the POWER OF AI!](https://html5accessibility.com/stuff/2026/04/29/keyboard-testing-with-the-power-of-ai/)
+
 **This is an experiment only**
 I have no idea how accurate it the output is.
 Use with extreme caution and awareness. Modify it as you like!
