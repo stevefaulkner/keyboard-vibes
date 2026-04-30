@@ -1,0 +1,18 @@
+{
+  "name": "keyboard-vibes",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Stable JavaScript keyboard operability harness using Playwright and axe-core.",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "test:keyboard": "node src/run-keyboard-audit.js",
+    "test:example": "node src/run-keyboard-audit.js --url https://example.com"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "playwright": "^1.52.0"
+  }
+}

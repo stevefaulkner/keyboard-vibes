@@ -7,7 +7,7 @@ test harness for keyboard tests built using chatgpt.
 I have no idea how accurate it the output is.
 Use with extreme caution and awareness. Modify it as you like!
 
-# Keyboard Operability JS Stable v2 – Setup and Usage Guide
+# Keyboard Operability JS – Setup and Usage Guide
 
 ## 1. Overview
 
@@ -25,15 +25,19 @@ It evaluates:
 - Focus order heuristics (WCAG 2.4.3)
 - axe-core accessibility violations
 
+Activation probing means the runner attempts keyboard activation (Enter/Space)
+on focused controls to detect elements that appear interactive but do not respond
+to keyboard input.
+
 > This is an automated audit tool — not a full replacement for manual accessibility testing.
 
 ---
 
 ## 2. Prerequisites
 
-- Windows 10 or 11  
-- Node.js (v18 or later recommended)  
-- Internet connection  
+- macOS, Linux, or Windows
+- Node.js 24 or later
+- Internet connection
 
 Check Node:
 
@@ -46,25 +50,17 @@ npm -v
 
 ## 3. Installation
 
-### Step 1 — Extract
+### Step 1 — Navigate
 
-Unzip:
-
-```
-keyboard-operability-js-stable-v2.zip
-```
-
----
-
-### Step 2 — Navigate
+From the repository root:
 
 ```
-cd C:\Users\<your-user>\test\keyboard-operability-js-stable-v2
+cd keyboard-vibes
 ```
 
 ---
 
-### Step 3 — Install dependencies
+### Step 2 — Install dependencies
 
 ```
 npm install
@@ -72,7 +68,7 @@ npm install
 
 ---
 
-### Step 4 — Install browsers
+### Step 3 — Install browsers
 
 ```
 npm run install:browsers
@@ -101,6 +97,56 @@ npm run test:keyboard -- \
 - `--max-tabs 200`
 - `--output-dir reports-custom`
 - `--headed`
+- `--crawl`
+- `--max-pages 50`
+- `--include-external`
+- `--same-domain`
+- `--safe-mode`
+- `--active-probes`
+
+### Crawl a site (seed URLs -> discover links -> test discovered pages)
+
+The crawl mode starts from one or more `--url` seed pages, discovers links,
+and audits those discovered pages too.
+
+Default crawl behavior:
+
+- Breadth-first discovery from the seed pages
+- Same-origin links only (unless `--include-external` is used)
+- Use `--same-domain` to include seed-domain subdomains while excluding unrelated domains
+- Non-HTML-like assets (images, PDFs, archives, fonts, media) are skipped
+- Maximum discovered pages controlled by `--max-pages` (default `20`)
+- Safe mode is automatically enabled during crawl
+
+Examples:
+
+```bash
+# Crawl and audit up to 20 pages on the same origin (safe mode auto-enabled)
+npm run test:keyboard -- --url https://example.com --crawl --max-pages 20
+
+# Use multiple seed pages to improve coverage of major sections
+npm run test:keyboard -- \
+  --url https://example.com \
+  --url https://example.com/docs \
+  --url https://example.com/blog \
+  --crawl --max-pages 60
+
+# Include discovered off-origin links (for federated docs or partner properties)
+npm run test:keyboard -- --url https://example.com --crawl --include-external --max-pages 40
+
+# Keep crawl within seed domain and subdomains only (for example, va.gov + www.va.gov)
+npm run test:keyboard -- --url https://va.gov --crawl --same-domain --max-pages 30
+
+# Force active probes during crawl (higher risk on production flows)
+npm run test:keyboard -- --url https://example.com --crawl --active-probes --max-pages 20
+```
+
+Safe mode notes:
+
+- `--safe-mode` disables active interaction probes (activation, skip-link activation,
+  dialog open/close checks)
+- Crawl mode enables safe mode by default unless `--active-probes` is set
+- For production sites, prefer safe mode to reduce side effects
 
 ---
 
@@ -111,6 +157,17 @@ Reports are generated in:
 ```
 /reports/
 ```
+
+When crawl is used and `--output-dir` is omitted, reports default to a domain folder:
+
+- `reports/<seed-host>-<max-pages>/`
+- Example: `reports/va.gov-30/`
+
+Suggested structure for repeated runs:
+
+- `reports/` for normal audits
+- `reports/smoke/` for smoke test runs
+- `reports/smoke/safe/` for safe-mode smoke test runs
 
 Includes:
 
@@ -156,11 +213,9 @@ npm install
 npm run install:browsers
 ```
 
-### OneDrive issues
-Move to:
-```
-C:\dev\keyboard-operability-js-stable-v2
-```
+### Synced folder issues
+If browser automation is unstable inside synced folders (OneDrive, iCloud, Dropbox),
+move the project to a normal local development path and run again.
 
 ---
 
@@ -170,6 +225,13 @@ C:\dev\keyboard-operability-js-stable-v2
 2. Review report
 3. Fix issues
 4. Re-run
+
+Suggested crawl workflow:
+
+1. Start with 2 to 5 representative seed URLs
+2. Run crawl with a moderate limit (`--max-pages 20` to `--max-pages 60`)
+3. Review severe issues first across discovered pages
+4. Increase max pages or add seeds to cover missed site sections
 
 ---
 
@@ -186,3 +248,27 @@ C:\dev\keyboard-operability-js-stable-v2
 - CI integration
 - visual focus maps
 - regression tracking
+
+---
+
+## 11. Accessibility Resources
+
+- Project-specific reporting guide: `ACCESSIBILITY.md`
+- Accessibility reference: https://mgifford.github.io/ACCESSIBILITY.md/
+- Accessibility bug reporting best practices:
+  https://mgifford.github.io/ACCESSIBILITY.md/examples/ACCESSIBILITY_BUG_REPORTING_BEST_PRACTICES.html
+
+### Reporting process (recommended)
+
+When filing issues from this audit output, include:
+
+- Exact URL where the problem occurs
+- Severity and WCAG mapping from the report
+- Selector and issue type from the report
+- Keyboard-only reproduction steps (Tab, Shift+Tab, Enter, Space, Escape)
+- Expected behavior vs actual behavior
+- Suggested remediation from the "Recommended action" column
+- Browser/OS and assistive technology context if relevant
+
+Use the bug-reporting best-practices page above to keep reports actionable,
+consistent, and easy for engineering teams to triage.
