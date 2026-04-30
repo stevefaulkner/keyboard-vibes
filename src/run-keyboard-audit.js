@@ -14,6 +14,7 @@ function readArgs(argv = process.argv.slice(2)) {
   let maxPages = 20;
   let sameOriginOnly = true;
   let sameDomainOnly = false;
+  let sameHostFamilyOnly = false;
   let safeMode = false;
   let forceActiveProbes = false;
 
@@ -52,6 +53,10 @@ function readArgs(argv = process.argv.slice(2)) {
     } else if (arg === "--same-domain") {
       sameDomainOnly = true;
       sameOriginOnly = false;
+    } else if (arg === "--same-host-family") {
+      sameHostFamilyOnly = true;
+      sameDomainOnly = false;
+      sameOriginOnly = false;
     } else if (arg === "--safe-mode") {
       safeMode = true;
     } else if (arg === "--active-probes") {
@@ -85,6 +90,7 @@ function readArgs(argv = process.argv.slice(2)) {
     maxPages,
     sameOriginOnly,
     sameDomainOnly,
+    sameHostFamilyOnly,
     safeMode,
     forceActiveProbes
   };
@@ -137,13 +143,14 @@ async function extractCrawlLinks(page) {
 }
 
 async function discoverUrlsForAudit(context, seedUrls, options) {
-  const { maxPages, sameOriginOnly, sameDomainOnly } = options;
+  const { maxPages, sameOriginOnly, sameDomainOnly, sameHostFamilyOnly } = options;
   const queue = [...seedUrls];
   const queued = new Set(queue);
   const visited = new Set();
   const discovered = [];
   const seedOrigins = new Set(seedUrls.map((value) => new URL(value).origin));
   const seedDomainSuffixes = buildSeedDomainSuffixes(seedUrls);
+  const seedHostFamilyAllowlist = buildSeedHostFamilyAllowlist(seedUrls);
 
   while (queue.length > 0 && discovered.length < maxPages) {
     const targetUrl = queue.shift();
@@ -179,6 +186,10 @@ async function discoverUrlsForAudit(context, seedUrls, options) {
         }
 
         if (sameDomainOnly && !isHostAllowedForDomains(candidate.hostname, seedDomainSuffixes)) {
+          continue;
+        }
+
+        if (sameHostFamilyOnly && !seedHostFamilyAllowlist.has(candidate.hostname.toLowerCase())) {
           continue;
         }
 
@@ -228,6 +239,19 @@ function isHostAllowedForDomains(hostname, allowedDomainSuffixes) {
   }
 
   return false;
+}
+
+function buildSeedHostFamilyAllowlist(seedUrls) {
+  const allowlist = new Set();
+
+  for (const value of seedUrls) {
+    const host = new URL(value).hostname.toLowerCase();
+    const bareHost = host.startsWith("www.") ? host.slice(4) : host;
+    allowlist.add(bareHost);
+    allowlist.add(`www.${bareHost}`);
+  }
+
+  return allowlist;
 }
 
 async function auditPage(page, url, maxTabs, options = {}) {
@@ -1444,6 +1468,7 @@ async function main() {
     maxPages,
     sameOriginOnly,
     sameDomainOnly,
+    sameHostFamilyOnly,
     safeMode,
     forceActiveProbes
   } = readArgs();
@@ -1463,7 +1488,8 @@ async function main() {
       urlsToAudit = await discoverUrlsForAudit(context, urls, {
         maxPages,
         sameOriginOnly,
-        sameDomainOnly
+        sameDomainOnly,
+        sameHostFamilyOnly
       });
 
       if (urlsToAudit.length === 0) {
@@ -1495,6 +1521,7 @@ async function main() {
       maxPages,
       sameOriginOnly,
       sameDomainOnly,
+      sameHostFamilyOnly,
       safeMode,
       forceActiveProbes
     }

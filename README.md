@@ -101,6 +101,7 @@ npm run test:keyboard -- \
 - `--max-pages 50`
 - `--include-external`
 - `--same-domain`
+- `--same-host-family`
 - `--safe-mode`
 - `--active-probes`
 
@@ -114,6 +115,7 @@ Default crawl behavior:
 - Breadth-first discovery from the seed pages
 - Same-origin links only (unless `--include-external` is used)
 - Use `--same-domain` to include seed-domain subdomains while excluding unrelated domains
+- Use `--same-host-family` to keep only the seed host plus its `www`/non-`www` pair
 - Non-HTML-like assets (images, PDFs, archives, fonts, media) are skipped
 - Maximum discovered pages controlled by `--max-pages` (default `20`)
 - Safe mode is automatically enabled during crawl
@@ -136,6 +138,9 @@ npm run test:keyboard -- --url https://example.com --crawl --include-external --
 
 # Keep crawl within seed domain and subdomains only (for example, va.gov + www.va.gov)
 npm run test:keyboard -- --url https://va.gov --crawl --same-domain --max-pages 30
+
+# Keep crawl to only seed host family (for example, va.gov and www.va.gov)
+npm run test:keyboard -- --url https://va.gov --crawl --same-host-family --max-pages 30
 
 # Force active probes during crawl (higher risk on production flows)
 npm run test:keyboard -- --url https://example.com --crawl --active-probes --max-pages 20
