@@ -1,0 +1,15 @@
+{
+  "name": "keyboard-operability-js-pro-responsive",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Keyboard operability audit harness with responsive testing, human-readable axe-core reporting, and bounded scoped screenshots.",
+  "scripts": {
+    "install:browsers": "playwright install chromium",
+    "test:keyboard": "node src/run-keyboard-audit.js",
+    "test:example": "node src/run-keyboard-audit.js --url https://example.com --headed --screenshots --visualize --responsive"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "playwright": "^1.52.0"
+  }
+}
